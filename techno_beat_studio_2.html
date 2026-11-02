@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techno Beat Studio & Sequencer PRO</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        techno: {
+                            bg: '#07070b',
+                            panel: '#0f1017',
+                            card: '#161824',
+                            border: '#24283b',
+                            accent: '#00ffcc',
+                            purple: '#b006ff',
+                            pink: '#ff0055',
+                            acid: '#a6ff00',
+                            orange: '#ff6b00',
+                            gold: '#ffd700'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Orbitron', 'sans-serif'],
+                        body: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #07070b;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+        
+        .font-display {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07070b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #24283b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffcc;
+        }
+
+        /* Neon Glow Effects */
+        .glow-accent { box-shadow: 0 0 14px rgba(0, 255, 204, 0.45); }
+        .glow-pink { box-shadow: 0 0 14px rgba(255, 0, 85, 0.45); }
+        .glow-acid { box-shadow: 0 0 14px rgba(166, 255, 0, 0.45); }
+        .glow-purple { box-shadow: 0 0 14px rgba(176, 6, 255, 0.45); }
+
+        /* Custom Range Inputs */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #161824;
+            border-radius: 4px;
+            height: 6px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #00ffcc;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00ffcc;
+            transition: all 0.1s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #ffffff;
+        }
+
+        /* Step Button Styling */
+        .step-btn {
+            transition: all 0.12s ease;
+        }
+        .step-btn.active {
+            background-color: #00ffcc;
+            box-shadow: 0 0 8px #00ffcc;
+            border-color: #ffffff;
+            color: #000;
+        }
+        .step-btn.active-acid {
+            background-color: #a6ff00;
+            box-shadow: 0 0 8px #a6ff00;
+            border-color: #ffffff;
+            color: #000;
+        }
+        .step-btn.current {
+            border-color: #ff0055 !important;
+            box-shadow: inset 0 0 6px #ff0055, 0 0 6px #ff0055;
+            transform: scale(1.05);
+        }
+
+        /* Tab Buttons */
+        .tab-btn.active-tab {
+            background-color: #00ffcc;
+            color: #000;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 md:p-4 text-xs md:text-sm">
+
+    <!-- Top Navigation & Master Control Bar -->
+    <header class="max-w-[1600px] w-full mx-auto mb-3 bg-techno-panel p-3.5 rounded-xl border border-techno-border shadow-2xl flex flex-wrap items-center justify-between gap-3">
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-techno-accent via-techno-purple to-techno-pink flex items-center justify-center text-black font-extrabold text-xl font-display shadow-lg glow-accent">
+                <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div>
+                <h1 class="text-lg md:text-xl font-black font-display tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-techno-accent via-white to-techno-pink">
+                    TECHNO LAB <span class="text-[10px] px-2 py-0.5 rounded bg-techno-purple/40 text-techno-accent border border-techno-purple">PRO WORKSTATION</span>
+                </h1>
+                <p class="text-[11px] text-gray-400">Επαγγελματικό Techno Studio, 303 Synth & Master Audio FX Rack</p>
+            </div>
+        </div>
+
+        <!-- Master Clock & Tempo Controls -->
+        <div class="flex flex-wrap items-center gap-3 bg-techno-bg/90 p-2 rounded-lg border border-techno-border">
+            <!-- BPM Slider & Numeric -->
+            <div class="flex items-center gap-2 px-2 border-r border-techno-border/80 pr-3">
+                <i class="fa-solid fa-gauge-high text-techno-accent"></i>
+                <span class="font-display font-semibold text-xs text-gray-300">BPM:</span>
+                <span id="bpmDisplay" class="font-display font-bold text-techno-accent text-base w-9 text-right">132</span>
+                <input type="range" id="bpmSlider" min="60" max="180" value="132" class="w-20 md:w-28 accent-techno-accent">
+                <button id="tapTempoBtn" class="px-2 py-1 text-[10px] font-display font-bold bg-techno-card hover:bg-techno-border rounded text-techno-accent border border-techno-border">TAP</button>
+            </div>
+
+            <!-- Swing / Shuffle Knob -->
+            <div class="flex items-center gap-2 border-r border-techno-border/80 pr-3">
+                <span class="font-display text-xs text-gray-400" title="Swing / Groove Shuffle">Swing:</span>
+                <input type="range" id="swingSlider" min="0" max="75" value="0" class="w-16 accent-techno-accent">
+                <span id="swingDisplay" class="font-display text-xs text-techno-accent w-7 text-right">0%</span>
+            </div>
+
+            <!-- Step Length Options -->
+            <div class="flex items-center gap-1 border-r border-techno-border/80 pr-3">
+                <span class="font-display text-xs text-gray-400 mr-1">Steps:</span>
+                <button id="step16Btn" class="px-2 py-1 rounded text-[10px] font-display font-bold bg-techno-accent text-black transition">16</button>
+                <button id="step32Btn" class="px-2 py-1 rounded text-[10px] font-display font-bold text-gray-400 hover:text-white bg-techno-card border border-techno-border transition">32</button>
+                <button id="step64Btn" class="px-2 py-1 rounded text-[10px] font-display font-bold text-gray-400 hover:text-white bg-techno-card border border-techno-border transition">64</button>
+            </div>
+
+            <!-- Pattern Bank Selector (A/B/C/D) -->
+            <div class="flex items-center gap-1">
+                <span class="font-display text-xs text-gray-400 mr-1">Bank:</span>
+                <div class="flex gap-1 bg-techno-card p-0.5 rounded border border-techno-border">
+                    <button class="bank-btn px-2 py-0.5 text-[10px] font-display font-bold rounded bg-techno-pink text-white" data-bank="0">A</button>
+                    <button class="bank-btn px-2 py-0.5 text-[10px] font-display font-bold rounded text-gray-400 hover:text-white" data-bank="1">B</button>
+                    <button class="bank-btn px-2 py-0.5 text-[10px] font-display font-bold rounded text-gray-400 hover:text-white" data-bank="2">C</button>
+                    <button class="bank-btn px-2 py-0.5 text-[10px] font-display font-bold rounded text-gray-400 hover:text-white" data-bank="3">D</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Transport & Recording -->
+        <div class="flex items-center gap-2">
+            <button id="playBtn" class="px-4 py-2 rounded-lg bg-techno-accent text-black font-display font-bold hover:bg-emerald-300 transition flex items-center gap-2 glow-accent text-xs md:text-sm">
+                <i class="fa-solid fa-play"></i> Αναπαραγωγή
+            </button>
+            <button id="stopBtn" class="px-3 py-2 rounded-lg bg-techno-card text-gray-300 hover:text-white border border-techno-border hover:bg-techno-border transition flex items-center gap-1.5 text-xs md:text-sm">
+                <i class="fa-solid fa-stop"></i> Stop
+            </button>
+            <button id="recordBtn" class="px-3 py-2 rounded-lg bg-techno-pink/20 text-techno-pink hover:bg-techno-pink hover:text-white border border-techno-pink/50 transition flex items-center gap-1.5 font-display text-xs md:text-sm">
+                <i class="fa-solid fa-circle text-[10px] animate-pulse"></i> <span id="recBtnText">Εγγραφή WAV</span>
+            </button>
+            <a id="downloadLink" class="hidden px-3 py-2 rounded-lg bg-techno-acid text-black hover:bg-lime-400 font-display font-bold transition flex items-center gap-1.5 text-xs md:text-sm glow-acid">
+                <i class="fa-solid fa-download"></i> Download WAV
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Studio Layout Grid -->
+    <main class="max-w-[1600px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        
+        <!-- Sequencer Section (8 Cols) -->
+        <section class="lg:col-span-8 bg-techno-panel p-3.5 md:p-4 rounded-xl border border-techno-border flex flex-col justify-between shadow-xl">
+            <div>
+                <!-- Sequencer Header Controls -->
+                <div class="flex flex-wrap items-center justify-between pb-3 mb-3 border-b border-techno-border gap-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-grip text-techno-accent"></i>
+                        <h2 class="font-display font-bold text-xs md:text-sm tracking-wider uppercase text-gray-200">Step Sequencer Engine</h2>
+                        <span id="bankIndicator" class="text-[10px] font-display bg-techno-pink/20 text-techno-pink px-2 py-0.5 rounded border border-techno-pink/40">BANK A</span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Sub-genre Presets Dropdown -->
+                        <div class="flex items-center gap-1 bg-techno-bg px-2 py-1 rounded border border-techno-border">
+                            <i class="fa-solid fa-compact-disc text-techno-purple text-xs"></i>
+                            <label for="presetSelect" class="text-[11px] text-gray-400 font-display">Genre Preset:</label>
+                            <select id="presetSelect" class="bg-transparent text-[11px] text-techno-accent font-display focus:outline-none cursor-pointer">
+                                <option value="peakTime" class="bg-techno-panel text-white">Peak Time Mainroom (132 BPM)</option>
+                                <option value="industrial" class="bg-techno-panel text-white">Dark Industrial / Hard (150 BPM)</option>
+                                <option value="acidRave" class="bg-techno-panel text-white">Acid 303 Rave Techno (140 BPM)</option>
+                                <option value="dubMinimal" class="bg-techno-panel text-white">Minimal Dub Techno (124 BPM)</option>
+                                <option value="melodic" class="bg-techno-panel text-white">Melodic & Synthwave (126 BPM)</option>
+                                <option value="schranz" class="bg-techno-panel text-white">Schranz & Hardstyle (160 BPM)</option>
+                                <option value="empty" class="bg-techno-panel text-white">Clear Canvas</option>
+                            </select>
+                        </div>
+
+                        <!-- Pattern Import/Export -->
+                        <button id="exportPatternBtn" class="px-2 py-1 text-[11px] bg-techno-card hover:bg-techno-border rounded text-gray-300 transition flex items-center gap-1 border border-techno-border" title="Εξαγωγή μοτίβου σε JSON">
+                            <i class="fa-solid fa-file-export text-techno-accent"></i> Export
+                        </button>
+                        <button id="importPatternBtn" class="px-2 py-1 text-[11px] bg-techno-card hover:bg-techno-border rounded text-gray-300 transition flex items-center gap-1 border border-techno-border" title="Εισαγωγή μοτίβου από JSON">
+                            <i class="fa-solid fa-file-import text-techno-purple"></i> Import
+                        </button>
+                        <input type="file" id="importFileInput" class="hidden" accept=".json">
+
+                        <!-- Utility Buttons -->
+                        <button id="randomizeBtn" class="px-2 py-1 text-[11px] bg-techno-card hover:bg-techno-purple hover:text-white rounded text-gray-300 transition flex items-center gap-1 border border-techno-border">
+                            <i class="fa-solid fa-dice text-techno-accent"></i> Random
+                        </button>
+                        <button id="clearBtn" class="px-2 py-1 text-[11px] bg-techno-card hover:bg-techno-pink hover:text-white rounded text-gray-300 transition flex items-center gap-1 border border-techno-border">
+                            <i class="fa-solid fa-trash-can text-techno-pink"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step Numbers Header -->
+                <div id="stepHeader" class="grid gap-1 mb-1.5 pl-44 pr-2">
+                    <!-- Javascript populates step numbers -->
+                </div>
+
+                <!-- Sequencer Tracks Grid (9 Sound Channels) -->
+                <div id="tracksContainer" class="space-y-2 max-h-[580px] overflow-y-auto pr-1">
+                    <!-- Generated dynamically -->
+                </div>
+            </div>
+
+            <!-- Bottom Spectrum & Realtime Diagnostics -->
+            <div class="mt-4 bg-techno-bg p-2.5 rounded-lg border border-techno-border flex flex-col md:flex-row items-center gap-3">
+                <div class="w-full md:w-2/3 h-16 bg-black/80 rounded border border-techno-border relative overflow-hidden">
+                    <canvas id="visualizerCanvas" class="w-full h-full block"></canvas>
+                    <span class="absolute top-1 left-2 text-[9px] font-display text-gray-500 uppercase tracking-widest">
+                        Audio Spectrum & Peak Meter
+                    </span>
+                </div>
+                <div class="w-full md:w-1/3 text-[11px] text-gray-400 space-y-1">
+                    <div class="flex justify-between border-b border-techno-border/50 pb-0.5">
+                        <span>Engine Status:</span>
+                        <span id="engineStatus" class="text-techno-accent font-display">Έτοιμο</span>
+                    </div>
+                    <div class="flex justify-between border-b border-techno-border/50 pb-0.5">
+                        <span>Κατάσταση Εγγραφής:</span>
+                        <span id="recStatus" class="text-gray-400 font-display">Ανενεργή</span>
+                    </div>
+                    <div class="flex justify-between border-b border-techno-border/50 pb-0.5">
+                        <span>Τρέχον Βήμα:</span>
+                        <span id="currentStepDisplay" class="text-techno-pink font-display">1 / 16</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Sidechain Ducking:</span>
+                        <span id="sidechainStatus" class="text-techno-accent font-display">Active</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side: Rack Editors & Master FX (4 Cols) -->
+        <section class="lg:col-span-4 space-y-4">
+            
+            <!-- Navigation Tabs for Rack -->
+            <div class="flex bg-techno-panel p-1 rounded-xl border border-techno-border gap-1 font-display text-xs">
+                <button id="tabAcidBtn" class="tab-btn flex-1 py-1.5 rounded-lg active-tab transition text-center">303 Acid Synth</button>
+                <button id="tabFxBtn" class="tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition text-center">Master FX Rack</button>
+                <button id="tabMixerBtn" class="tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition text-center">Channel Mixer</button>
+            </div>
+
+            <!-- TAB 1: Acid TB-303 Synthesizer Rack -->
+            <div id="tabAcidContent" class="bg-techno-panel p-4 rounded-xl border border-techno-acid/40 shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-techno-border pb-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wave-square text-techno-acid"></i>
+                        <h3 class="font-display font-bold text-xs uppercase tracking-wider text-techno-acid">TB-303 Acid Synthesizer</h3>
+                    </div>
+                    <span class="text-[9px] bg-techno-acid/20 text-techno-acid px-1.5 py-0.5 rounded font-display border border-techno-acid/40">ANALOG VCO</span>
+                </div>
+
+                <!-- Acid Synthesizer Parameters -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Cutoff -->
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center">
+                        <label for="acidCutoff" class="text-[11px] font-display text-gray-300 mb-1">Filter Cutoff</label>
+                        <input type="range" id="acidCutoff" min="100" max="7000" value="2200" class="w-full accent-techno-acid">
+                        <span id="cutoffValue" class="text-[10px] font-display text-techno-acid mt-1">2200 Hz</span>
+                    </div>
+
+                    <!-- Resonance -->
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center">
+                        <label for="acidRes" class="text-[11px] font-display text-gray-300 mb-1">Resonance (Q)</label>
+                        <input type="range" id="acidRes" min="0" max="28" value="18" class="w-full accent-techno-acid">
+                        <span id="resValue" class="text-[10px] font-display text-techno-acid mt-1">18 dB</span>
+                    </div>
+
+                    <!-- Envelope Decay -->
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center">
+                        <label for="acidDecay" class="text-[11px] font-display text-gray-300 mb-1">Env Decay</label>
+                        <input type="range" id="acidDecay" min="0.05" max="1.2" step="0.05" value="0.25" class="w-full accent-techno-acid">
+                        <span id="decayValue" class="text-[10px] font-display text-techno-acid mt-1">0.25 s</span>
+                    </div>
+
+                    <!-- Accent Amount -->
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center">
+                        <label for="acidAccent" class="text-[11px] font-display text-gray-300 mb-1">Accent Boost</label>
+                        <input type="range" id="acidAccent" min="0" max="100" value="60" class="w-full accent-techno-acid">
+                        <span id="accentValue" class="text-[10px] font-display text-techno-acid mt-1">60%</span>
+                    </div>
+                </div>
+
+                <!-- LFO Controls & Slide -->
+                <div class="bg-techno-bg/80 p-3 rounded-lg border border-techno-border space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-display text-gray-300">Cutoff LFO Modulation:</span>
+                        <input type="checkbox" id="lfoEnable" class="accent-techno-acid cursor-pointer">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-[10px]">
+                        <div>
+                            <span class="text-gray-400">LFO Rate:</span>
+                            <input type="range" id="lfoRate" min="0.2" max="10" step="0.2" value="2" class="w-full accent-techno-acid">
+                        </div>
+                        <div>
+                            <span class="text-gray-400">LFO Depth:</span>
+                            <input type="range" id="lfoDepth" min="0" max="3000" value="1000" class="w-full accent-techno-acid">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waveform & Root Pitch Selector -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center">
+                        <label class="text-[11px] font-display text-gray-300 mb-1">Kυματομορφή</label>
+                        <div class="flex gap-1 w-full">
+                            <button id="waveSaw" class="flex-1 py-1 text-[10px] font-display rounded bg-techno-acid text-black font-bold">SAW</button>
+                            <button id="waveSquare" class="flex-1 py-1 text-[10px] font-display rounded bg-techno-card text-gray-400 border border-techno-border">SQR</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border flex flex-col items-center justify-center">
+                        <label for="acidNoteSelect" class="text-[11px] font-display text-gray-300 mb-1">Pitch Scale Octave</label>
+                        <select id="acidNoteSelect" class="bg-techno-panel text-[11px] text-techno-acid font-display p-1 rounded border border-techno-border w-full text-center focus:outline-none">
+                            <option value="C1">C1 Sub Bass</option>
+                            <option value="C2" selected>C2 Standard Acid</option>
+                            <option value="C3">C3 High Screamer</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Master Audio FX Rack -->
+            <div id="tabFxContent" class="hidden bg-techno-panel p-4 rounded-xl border border-techno-border shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-techno-border pb-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-techno-pink"></i>
+                        <h3 class="font-display font-bold text-xs uppercase tracking-wider text-gray-200">Master Effects Rack</h3>
+                    </div>
+                    <span class="text-[9px] bg-techno-pink/20 text-techno-pink px-1.5 py-0.5 rounded font-display border border-techno-pink/40">STUDIO BUS</span>
+                </div>
+
+                <!-- 1. Master Distortion & Drive -->
+                <div class="bg-techno-bg/80 p-3 rounded-lg border border-techno-border space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-display text-techno-pink font-semibold">Techno Overdrive / Drive:</span>
+                        <span id="driveValue" class="font-display text-gray-400 text-[10px]">0%</span>
+                    </div>
+                    <input type="range" id="masterDrive" min="0" max="100" value="15" class="w-full accent-techno-pink">
+                </div>
+
+                <!-- 2. Master Filter Sweep -->
+                <div class="bg-techno-bg/80 p-3 rounded-lg border border-techno-border space-y-2">
+                    <span class="font-display text-xs text-techno-accent font-semibold">Master Lowpass Filter Cutoff:</span>
+                    <input type="range" id="masterFilterCutoff" min="200" max="20000" value="20000" class="w-full accent-techno-accent">
+                </div>
+
+                <!-- 3. Space Reverb & Echo Delay -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border space-y-1 text-center">
+                        <span class="font-display text-[11px] text-techno-purple font-semibold">Hall Reverb Mix</span>
+                        <input type="range" id="reverbMix" min="0" max="100" value="25" class="w-full accent-techno-purple">
+                    </div>
+                    <div class="bg-techno-bg/80 p-2.5 rounded-lg border border-techno-border space-y-1 text-center">
+                        <span class="font-display text-[11px] text-techno-purple font-semibold">BPM Delay Mix</span>
+                        <input type="range" id="delayMix" min="0" max="100" value="20" class="w-full accent-techno-purple">
+                    </div>
+                </div>
+
+                <!-- 4. Sidechain Compression Ducking -->
+                <div class="bg-techno-bg/80 p-3 rounded-lg border border-techno-border flex items-center justify-between text-xs">
+                    <div>
+                        <span class="font-display text-gray-200 font-semibold block">Kick Sidechain Compression</span>
+                        <span class="text-[10px] text-gray-400">Δημιουργεί το χαρακτηριστικό "pumping" εφέ στο μπάσο</span>
+                    </div>
+                    <input type="checkbox" id="sidechainToggle" checked class="accent-techno-pink cursor-pointer w-4 h-4">
+                </div>
+            </div>
+
+            <!-- TAB 3: Mixer Console Overview -->
+            <div id="tabMixerContent" class="hidden bg-techno-panel p-4 rounded-xl border border-techno-border shadow-xl space-y-3">
+                <div class="flex items-center justify-between border-b border-techno-border pb-2">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-techno-accent"></i>
+                        <h3 class="font-display font-bold text-xs uppercase tracking-wider text-gray-200">Channel Mixer Console</h3>
+                    </div>
+                </div>
+
+                <div id="mixerFadersContainer" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                    <!-- Javascript populates quick faders -->
+                </div>
+            </div>
+
+            <!-- Techno Studio Quick Shortcuts -->
+            <div class="bg-techno-panel p-3.5 rounded-xl border border-techno-border text-xs text-gray-400 space-y-2">
+                <h4 class="font-display font-bold text-gray-200 flex items-center gap-1.5 text-xs uppercase tracking-wider">
+                    <i class="fa-solid fa-lightbulb text-techno-gold"></i> Techno Tips
+                </h4>
+                <p class="text-[11px] leading-relaxed">
+                    Αυξήστε το **Master Drive** και ενεργοποιήστε το **Sidechain** για να δώσετε τον χαρακτηριστικό σκοτεινό και βαρύ ήχο των underground clubs του Βερολίνου.
+                </p>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-[1600px] w-full mx-auto mt-4 text-center text-xs text-gray-500 py-2 border-t border-techno-border/40 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <p>© 2026 Techno Beat Studio PRO — Professional Web-Audio Digital Audio Workstation</p>
+        <p class="text-techno-accent font-display text-[11px]">Sub-genres: Peak Time • Acid • Industrial • Dub • Schranz</p>
+    </footer>
+
+    <!-- Audio Workstation Core Logic JavaScript -->
+    <script>
+        // --- Web Audio Context & State Initialization ---
+        let audioCtx = null;
+        let isPlaying = false;
+        let currentStep = 0;
+        let totalSteps = 16;
+        let bpm = 132;
+        let swingAmount = 0;
+        let currentBank = 0;
+        let nextNoteTime = 0.0;
+        let timerID = null;
+
+        // Master Audio Node Chain
+        let masterGainNode = null;
+        let masterFilterNode = null;
+        let masterDriveNode = null;
+        let reverbGainNode = null;
+        let delayGainNode = null;
+        let delayNode = null;
+        let analyserNode = null;
+
+        // Recording Stream & Storage
+        let destStreamNode = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordedPcmBuffersL = [];
+        let recordedPcmBuffersR = [];
+        let scriptProcessorNode = null;
+
+        // Sound Track Definitions (9 Channels)
+        const TRACK_KEYS = [
+            'kick', 'kickSub', 'hihatClosed', 'hihatOpen', 
+            'snareClap', 'tomLow', 'synthStab', 'acidBass', 'vocalNoise'
+        ];
+
+        const TRACK_CONFIG = {
+            kick: { name: 'Techno Kick', icon: 'fa-drum', color: 'text-techno-pink', activeClass: 'active', samples: ['909 Heavy Kick', 'Industrial Kick', 'Dark Modular Kick'] },
+            kickSub: { name: 'Sub Rumble', icon: 'fa-water', color: 'text-red-500', activeClass: 'active', samples: ['Rumble Sub', 'Reverb Tail Bass', 'Distorted Sub'] },
+            hihatClosed: { name: 'Closed Hat', icon: 'fa-border-all', color: 'text-techno-accent', activeClass: 'active', samples: ['Classic 909 Hat', 'Metallic Hat', 'Noise Hat'] },
+            hihatOpen: { name: 'Open Hat', icon: 'fa-expand', color: 'text-techno-accent', activeClass: 'active', samples: ['Open 909 Hat', 'Sizzling Open Hat', 'Short Open Hat'] },
+            snareClap: { name: 'Snare / Clap', icon: 'fa-hands-clapping', color: 'text-techno-purple', activeClass: 'active', samples: ['909 Snare', 'Hard Techno Clap', 'Noise Rimshot'] },
+            tomLow: { name: 'Low / Mid Tom', icon: 'fa-circle-dot', color: 'text-techno-orange', activeClass: 'active', samples: ['FM Techno Tom', '909 Low Tom', 'Industrial Perc'] },
+            synthStab: { name: 'Synth Stab', icon: 'fa-bolt', color: 'text-techno-gold', activeClass: 'active', samples: ['Minor 7th Stab', 'Rave Stab', 'Detuned Modular'] },
+            acidBass: { name: 'Acid 303 Bass', icon: 'fa-wave-square', color: 'text-techno-acid', activeClass: 'active-acid', samples: ['TB-303 VCO'] },
+            vocalNoise: { name: 'Vocal / Noise FX', icon: 'fa-bullhorn', color: 'text-emerald-400', activeClass: 'active', samples: ['Industrial Grunt', 'Noise Sweep FX', 'Modular Drone'] }
+        };
+
+        // Pattern Bank State (4 Banks A/B/C/D per Track)
+        let patternBanks = [{}, {}, {}, {}];
+
+        function initTrackStates() {
+            for (let b = 0; b < 4; b++) {
+                TRACK_KEYS.forEach(key => {
+                    patternBanks[b][key] = {
+                        steps: new Array(64).fill(false),
+                        volume: 0.8,
+                        pan: 0,
+                        pitch: 0, // semitone shift (-12 to +12)
+                        sampleIndex: 0,
+                        mute: false,
+                        solo: false
+                    };
+                });
+            }
+        }
+        initTrackStates();
+
+        // Acid Synth Synth Parameters
+        let acidWaveform = 'sawtooth';
+
+        // --- Sub-Genre Presets Data ---
+        const PRESETS = {
+            peakTime: {
+                bpm: 132,
+                kick: [0,4,8,12,16,20,24,28],
+                kickSub: [1,2,5,6,9,10,13,14,17,18,21,22,25,26,29,30],
+                hihatClosed: [2,6,10,14,18,22,26,30],
+                hihatOpen: [4,12,20,28],
+                snareClap: [4,12,20,28],
+                tomLow: [14,30],
+                synthStab: [3,7,11,15,19,23,27,31],
+                acidBass: [0,2,3,6,8,10,11,14,16,18,19,22,24,26,27,30],
+                vocalNoise: [0,16]
+            },
+            industrial: {
+                bpm: 150,
+                kick: [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30],
+                kickSub: [0,4,8,12,16,20,24,28],
+                hihatClosed: [2,6,10,14,18,22,26,30],
+                hihatOpen: [6,14,22,30],
+                snareClap: [4,12,20,28],
+                tomLow: [3,7,11,15,19,23,27,31],
+                synthStab: [0,8,16,24],
+                acidBass: [0,1,3,4,6,7,9,10,12,13,15,16,18,20,22,24,27,29,31],
+                vocalNoise: [4,12,20,28]
+            },
+            acidRave: {
+                bpm: 140,
+                kick: [0,4,8,12,16,20,24,28],
+                kickSub: [2,6,10,14,18,22,26,30],
+                hihatClosed: [2,6,10,14,18,22,26,30],
+                hihatOpen: [4,12,20,28],
+                snareClap: [4,12,20,28],
+                tomLow: [10,26],
+                synthStab: [6,14,22,30],
+                acidBass: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,20,22,24,26,28,30],
+                vocalNoise: [8,24]
+            },
+            dubMinimal: {
+                bpm: 124,
+                kick: [0,4,8,12,16,20,24,28],
+                kickSub: [0,8,16,24],
+                hihatClosed: [2,6,10,14,18,22,26,30],
+                hihatOpen: [8,24],
+                snareClap: [4,12,20,28],
+                tomLow: [6,22],
+                synthStab: [6,14,22,30],
+                acidBass: [0,7,12,16,23,28],
+                vocalNoise: [12,28]
+            },
+            melodic: {
+                bpm: 126,
+                kick: [0,4,8,12,16,20,24,28],
+                kickSub: [2,6,10,14,18,22,26,30],
+                hihatClosed: [2,6,10,14,18,22,26,30],
+                hihatOpen: [4,12,20,28],
+                snareClap: [4,12,20,28],
+                tomLow: [8,24],
+                synthStab: [0,3,6,8,11,14,16,19,22,24,27,30],
+                acidBass: [0,4,8,12,16,20,24,28],
+                vocalNoise: [0]
+            },
+            schranz: {
+                bpm: 160,
+                kick: [0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30],
+                kickSub: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                hihatClosed: [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31],
+                hihatOpen: [2,6,10,14,18,22,26,30],
+                snareClap: [4,12,20,28],
+                tomLow: [0,3,6,9,12,15,18,21,24,27,30],
+                synthStab: [2,6,10,14,18,22,26,30],
+                acidBass: [0,3,7,10,12,15,19,22,24,27,31],
+                vocalNoise: [6,14,22,30]
+            },
+            empty: { bpm: 130 }
+        };
+
+        // --- Audio Context & FX Rack Setup ---
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+
+                // Master Nodes Chain
+                masterGainNode = audioCtx.createGain();
+                masterGainNode.gain.value = 0.8;
+
+                // Master Drive Distortion (Waveshaper)
+                masterDriveNode = audioCtx.createWaveShaper();
+                updateMasterDrive(15);
+
+                // Master Lowpass Filter
+                masterFilterNode = audioCtx.createBiquadFilter();
+                masterFilterNode.type = 'lowpass';
+                masterFilterNode.frequency.value = 20000;
+
+                // Master Reverb & Delay Sends
+                reverbGainNode = audioCtx.createGain();
+                reverbGainNode.gain.value = 0.25;
+
+                delayGainNode = audioCtx.createGain();
+                delayGainNode.gain.value = 0.2;
+
+                delayNode = audioCtx.createDelay();
+                delayNode.delayTime.value = 0.228; // ~132 BPM eighth note delay
+
+                // Visualizer Analyser
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 128;
+
+                // Stream destination for Recording
+                destStreamNode = audioCtx.createMediaStreamDestination();
+
+                // Connect Chain
+                masterGainNode.connect(masterDriveNode);
+                masterDriveNode.connect(masterFilterNode);
+                masterFilterNode.connect(analyserNode);
+                analyserNode.connect(audioCtx.destination);
+                masterFilterNode.connect(destStreamNode);
+
+                setupVisualizer();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function updateMasterDrive(amount) {
+            if (!masterDriveNode) return;
+            const k = amount;
+            const n_samples = 44100;
+            const curve = new Float32Array(n_samples);
+            const deg = Math.PI / 180;
+            for (let i = 0; i < n_samples; ++i) {
+                let x = (i * 2) / n_samples - 1;
+                curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+            }
+            masterDriveNode.curve = curve;
+        }
+
+        // --- Web Audio Synthesizers & Sound Generators ---
+
+        function triggerKick(time, vol = 1.0, pitchShift = 0, sampleIdx = 0) {
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const baseFreq = 130 * Math.pow(2, pitchShift / 12);
+
+            osc.type = sampleIdx === 1 ? 'square' : 'sine';
+            osc.frequency.setValueAtTime(baseFreq, time);
+            osc.frequency.exponentialRampToValueAtTime(32, time + 0.09);
+
+            gain.gain.setValueAtTime(vol * 1.25, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
+
+            osc.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc.start(time);
+            osc.stop(time + 0.38);
+
+            // Trigger sidechain ducking effect on master gain
+            if (document.getElementById('sidechainToggle').checked) {
+                masterGainNode.gain.cancelScheduledValues(time);
+                masterGainNode.gain.setValueAtTime(0.25 * vol, time);
+                masterGainNode.gain.exponentialRampToValueAtTime(0.8, time + 0.2);
+            }
+        }
+
+        function triggerKickSub(time, vol = 1.0, pitchShift = 0) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            const freq = 45 * Math.pow(2, pitchShift / 12);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, time);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(85, time);
+
+            gain.gain.setValueAtTime(vol * 0.7, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc.start(time);
+            osc.stop(time + 0.4);
+        }
+
+        function triggerHiHat(time, isOpen = false, vol = 1.0, sampleIdx = 0) {
+            if (!audioCtx) return;
+            const dur = isOpen ? 0.22 : 0.04;
+            const bufferSize = audioCtx.sampleRate * dur;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(sampleIdx === 1 ? 9000 : 7000, time);
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(vol * (isOpen ? 0.65 : 0.45), time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGainNode);
+
+            noise.start(time);
+        }
+
+        function triggerSnareClap(time, vol = 1.0) {
+            if (!audioCtx) return;
+            const bufferSize = audioCtx.sampleRate * 0.16;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(1100, time);
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(vol * 0.75, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.16);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGainNode);
+
+            noise.start(time);
+        }
+
+        function triggerTomLow(time, vol = 1.0, pitchShift = 0) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const freq = 110 * Math.pow(2, pitchShift / 12);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, time);
+            osc.frequency.exponentialRampToValueAtTime(50, time + 0.18);
+
+            gain.gain.setValueAtTime(vol * 0.8, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+
+            osc.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc.start(time);
+            osc.stop(time + 0.2);
+        }
+
+        function triggerSynthStab(time, vol = 1.0, pitchShift = 0) {
+            if (!audioCtx) return;
+            const osc1 = audioCtx.createOscillator();
+            const osc2 = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            const baseFreq = 293.66 * Math.pow(2, pitchShift / 12);
+
+            osc1.type = 'sawtooth';
+            osc2.type = 'square';
+            osc1.frequency.setValueAtTime(baseFreq, time);
+            osc2.frequency.setValueAtTime(baseFreq * 1.1892, time); // Minor 7th interval
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(3200, time);
+            filter.frequency.exponentialRampToValueAtTime(450, time + 0.16);
+
+            gain.gain.setValueAtTime(vol * 0.55, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+
+            osc1.connect(filter);
+            osc2.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc1.start(time);
+            osc2.start(time);
+            osc1.stop(time + 0.18);
+            osc2.stop(time + 0.18);
+        }
+
+        function triggerAcidBass(time, stepIndex, vol = 1.0) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const filter = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            let cutoff = parseFloat(document.getElementById('acidCutoff').value);
+            const resonance = parseFloat(document.getElementById('acidRes').value);
+            const decay = parseFloat(document.getElementById('acidDecay').value);
+            const accent = parseFloat(document.getElementById('acidAccent').value) / 100;
+            const rootOctave = document.getElementById('acidNoteSelect').value;
+
+            // Apply LFO Modulation to Cutoff if enabled
+            if (document.getElementById('lfoEnable').checked) {
+                const lfoRate = parseFloat(document.getElementById('lfoRate').value);
+                const lfoDepth = parseFloat(document.getElementById('lfoDepth').value);
+                const lfoVal = Math.sin(audioCtx.currentTime * lfoRate * Math.PI * 2) * lfoDepth;
+                cutoff = Math.max(100, Math.min(8000, cutoff + lfoVal));
+            }
+
+            osc.type = acidWaveform;
+
+            let baseFreq = 65.41; // C2
+            if (rootOctave === 'C1') baseFreq = 32.70;
+            if (rootOctave === 'C3') baseFreq = 130.81;
+
+            const scaleOffsets = [0, 0, 12, 3, 0, 7, 0, 12, 0, 3, 0, 5, 12, 0, 7, 10];
+            const semitoneShift = scaleOffsets[stepIndex % 16];
+            const freq = baseFreq * Math.pow(2, semitoneShift / 12);
+
+            osc.frequency.setValueAtTime(freq, time);
+
+            filter.type = 'lowpass';
+            filter.Q.setValueAtTime(resonance, time);
+            filter.frequency.setValueAtTime(cutoff * (1 + accent * 0.5), time);
+            filter.frequency.exponentialRampToValueAtTime(Math.max(80, cutoff * 0.1), time + decay);
+
+            gain.gain.setValueAtTime(vol * 0.7 * (1 + accent * 0.3), time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + decay);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc.start(time);
+            osc.stop(time + decay + 0.05);
+        }
+
+        function triggerVocalNoise(time, vol = 1.0) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(90, time);
+            osc.frequency.exponentialRampToValueAtTime(30, time + 0.3);
+
+            gain.gain.setValueAtTime(vol * 0.5, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+
+            osc.connect(gain);
+            gain.connect(masterGainNode);
+
+            osc.start(time);
+            osc.stop(time + 0.3);
+        }
+
+        // Master Sound Dispatcher
+        function playStepSound(trackKey, time, stepIdx) {
+            const track = patternBanks[currentBank][trackKey];
+            if (track.mute) return;
+
+            const isAnySolo = Object.values(patternBanks[currentBank]).some(t => t.solo);
+            if (isAnySolo && !track.solo) return;
+
+            const vol = track.volume;
+            const pitch = track.pitch || 0;
+            const sampleIdx = track.sampleIndex || 0;
+
+            switch (trackKey) {
+                case 'kick': triggerKick(time, vol, pitch, sampleIdx); break;
+                case 'kickSub': triggerKickSub(time, vol, pitch); break;
+                case 'hihatClosed': triggerHiHat(time, false, vol, sampleIdx); break;
+                case 'hihatOpen': triggerHiHat(time, true, vol, sampleIdx); break;
+                case 'snareClap': triggerSnareClap(time, vol); break;
+                case 'tomLow': triggerTomLow(time, vol, pitch); break;
+                case 'synthStab': triggerSynthStab(time, vol, pitch); break;
+                case 'acidBass': triggerAcidBass(time, stepIdx, vol); break;
+                case 'vocalNoise': triggerVocalNoise(time, vol); break;
+            }
+        }
+
+        // --- Sequencer Clock & Scheduler ---
+        function scheduler() {
+            while (nextNoteTime < audioCtx.currentTime + 0.1) {
+                scheduleStep(currentStep, nextNoteTime);
+                advanceStep();
+            }
+            timerID = setTimeout(scheduler, 25);
+        }
+
+        function scheduleStep(stepIdx, time) {
+            audioCtx && setTimeout(() => {
+                updateVisualStepHighlight(stepIdx);
+            }, (time - audioCtx.currentTime) * 1000);
+
+            TRACK_KEYS.forEach(key => {
+                if (patternBanks[currentBank][key].steps[stepIdx]) {
+                    playStepSound(key, time, stepIdx);
+                }
+            });
+        }
+
+        function advanceStep() {
+            const secondsPerBeat = 60.0 / bpm;
+            let stepTime = 0.25 * secondsPerBeat;
+
+            // Apply Swing to odd 16th steps
+            if (currentStep % 2 === 1 && swingAmount > 0) {
+                stepTime += (swingAmount / 100) * 0.12 * secondsPerBeat;
+            }
+
+            nextNoteTime += stepTime;
+            currentStep = (currentStep + 1) % totalSteps;
+        }
+
+        // --- UI Rendering Engines ---
+
+        function renderSequencerGrid() {
+            const container = document.getElementById('tracksContainer');
+            container.innerHTML = '';
+
+            // Step Numbers Header
+            const header = document.getElementById('stepHeader');
+            header.innerHTML = '';
+            header.style.gridTemplateColumns = `repeat(${totalSteps}, minmax(0, 1fr))`;
+
+            for (let i = 0; i < totalSteps; i++) {
+                const num = document.createElement('div');
+                num.className = `text-center text-[9px] font-display font-semibold ${i % 4 === 0 ? 'text-techno-accent' : 'text-gray-600'}`;
+                num.innerText = i + 1;
+                header.appendChild(num);
+            }
+
+            // Build Sequencer Track Rows
+            TRACK_KEYS.forEach(key => {
+                const conf = TRACK_CONFIG[key];
+                const track = patternBanks[currentBank][key];
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-1.5 bg-techno-bg/90 p-1.5 rounded-lg border border-techno-border/60 hover:border-techno-border transition';
+
+                // Track Controls Column
+                const info = document.createElement('div');
+                info.className = 'w-44 flex-shrink-0 flex flex-col gap-1 pr-1 border-r border-techno-border/60';
+
+                info.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-display text-[11px] font-bold ${conf.color} truncate flex items-center gap-1">
+                            <i class="fa-solid ${conf.icon} text-[10px]"></i> ${conf.name}
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <button class="mute-btn px-1 py-0.2 text-[8px] font-display rounded border ${track.mute ? 'bg-red-500/40 text-red-300 border-red-500' : 'bg-techno-card text-gray-400 border-techno-border'}" data-key="${key}">M</button>
+                            <button class="solo-btn px-1 py-0.2 text-[8px] font-display rounded border ${track.solo ? 'bg-yellow-500/40 text-yellow-300 border-yellow-500' : 'bg-techno-card text-gray-400 border-techno-border'}" data-key="${key}">S</button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-1 text-[9px]">
+                        <select class="sample-select bg-techno-panel text-gray-300 text-[9px] font-display rounded border border-techno-border px-1 py-0.5 w-24" data-key="${key}">
+                            ${conf.samples.map((s, idx) => `<option value="${idx}" ${track.sampleIndex === idx ? 'selected' : ''}>${s}</option>`).join('')}
+                        </select>
+                        <input type="range" class="track-vol w-14 accent-techno-accent" min="0" max="100" value="${track.volume * 100}" data-key="${key}">
+                    </div>
+                `;
+
+                // Steps Button Grid
+                const stepsGrid = document.createElement('div');
+                stepsGrid.className = 'grid gap-1 flex-1';
+                stepsGrid.style.gridTemplateColumns = `repeat(${totalSteps}, minmax(0, 1fr))`;
+
+                for (let s = 0; s < totalSteps; s++) {
+                    const stepBtn = document.createElement('button');
+                    const isActive = track.steps[s];
+                    const isBeatGroup = Math.floor(s / 4) % 2 === 0;
+
+                    stepBtn.className = `step-btn h-7 rounded border border-techno-border/80 ${isBeatGroup ? 'bg-techno-card' : 'bg-techno-bg'} ${isActive ? conf.activeClass : ''}`;
+                    stepBtn.dataset.key = key;
+                    stepBtn.dataset.step = s;
+
+                    stepBtn.addEventListener('click', () => {
+                        ensureAudioContext();
+                        track.steps[s] = !track.steps[s];
+                        stepBtn.classList.toggle(conf.activeClass, track.steps[s]);
+
+                        if (track.steps[s] && !isPlaying) {
+                            playStepSound(key, audioCtx.currentTime, s);
+                        }
+                    });
+
+                    stepsGrid.appendChild(stepBtn);
+                }
+
+                row.appendChild(info);
+                row.appendChild(stepsGrid);
+                container.appendChild(row);
+            });
+
+            // Bind Events
+            document.querySelectorAll('.mute-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const k = e.target.dataset.key;
+                    patternBanks[currentBank][k].mute = !patternBanks[currentBank][k].mute;
+                    renderSequencerGrid();
+                };
+            });
+
+            document.querySelectorAll('.solo-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    const k = e.target.dataset.key;
+                    patternBanks[currentBank][k].solo = !patternBanks[currentBank][k].solo;
+                    renderSequencerGrid();
+                };
+            });
+
+            document.querySelectorAll('.track-vol').forEach(input => {
+                input.oninput = (e) => {
+                    const k = e.target.dataset.key;
+                    patternBanks[currentBank][k].volume = parseFloat(e.target.value) / 100;
+                };
+            });
+
+            document.querySelectorAll('.sample-select').forEach(sel => {
+                sel.onchange = (e) => {
+                    const k = e.target.dataset.key;
+                    patternBanks[currentBank][k].sampleIndex = parseInt(e.target.value);
+                };
+            });
+
+            renderMixerConsole();
+        }
+
+        function renderMixerConsole() {
+            const container = document.getElementById('mixerFadersContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            TRACK_KEYS.forEach(key => {
+                const conf = TRACK_CONFIG[key];
+                const track = patternBanks[currentBank][key];
+
+                const faderRow = document.createElement('div');
+                faderRow.className = 'flex items-center justify-between bg-techno-bg/80 p-2 rounded border border-techno-border text-xs';
+
+                faderRow.innerHTML = `
+                    <span class="font-display font-semibold ${conf.color} w-28 truncate flex items-center gap-1">
+                        <i class="fa-solid ${conf.icon} text-[10px]"></i> ${conf.name}
+                    </span>
+                    <input type="range" class="mixer-vol w-32 accent-techno-accent" min="0" max="100" value="${track.volume * 100}" data-key="${key}">
+                    <span class="font-display text-[10px] text-gray-400 w-8 text-right">${Math.round(track.volume * 100)}%</span>
+                `;
+
+                faderRow.querySelector('.mixer-vol').oninput = (e) => {
+                    patternBanks[currentBank][key].volume = parseFloat(e.target.value) / 100;
+                    renderSequencerGrid();
+                };
+
+                container.appendChild(faderRow);
+            });
+        }
+
+        function updateVisualStepHighlight(stepIdx) {
+            document.getElementById('currentStepDisplay').innerText = `${stepIdx + 1} / ${totalSteps}`;
+
+            const buttons = document.querySelectorAll('.step-btn');
+            buttons.forEach(btn => {
+                const bStep = parseInt(btn.dataset.step);
+                if (bStep === stepIdx) {
+                    btn.classList.add('current');
+                } else {
+                    btn.classList.remove('current');
+                }
+            });
+        }
+
+        // --- Sub-Genre Presets Loader ---
+        function loadPreset(presetKey) {
+            const preset = PRESETS[presetKey];
+            if (!preset) return;
+
+            if (preset.bpm) {
+                bpm = preset.bpm;
+                document.getElementById('bpmSlider').value = bpm;
+                document.getElementById('bpmDisplay').innerText = bpm;
+            }
+
+            TRACK_KEYS.forEach(k => {
+                patternBanks[currentBank][k].steps.fill(false);
+                if (preset[k]) {
+                    preset[k].forEach(sIdx => {
+                        if (sIdx < 64) patternBanks[currentBank][k].steps[sIdx] = true;
+                    });
+                }
+            });
+
+            renderSequencerGrid();
+        }
+
+        // --- Visualizer Setup ---
+        function setupVisualizer() {
+            const canvas = document.getElementById('visualizerCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyserNode.getByteTimeDomainData(dataArray);
+
+                ctx.fillStyle = '#07070b';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#00ffcc';
+                ctx.beginPath();
+
+                const sliceWidth = canvas.width * 1.0 / bufferLength;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * canvas.height / 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    x += sliceWidth;
+                }
+
+                ctx.lineTo(canvas.width, canvas.height / 2);
+                ctx.stroke();
+            }
+
+            draw();
+        }
+
+        // --- Audio Recording & File Export (WAV PCM) ---
+        function createWavBlob(samplesL, samplesR, sampleRate) {
+            const numChannels = 2;
+            const totalSamples = samplesL.length;
+            const buffer = new ArrayBuffer(44 + totalSamples * 2 * numChannels);
+            const view = new DataView(buffer);
+
+            function writeString(offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + totalSamples * 2 * numChannels, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * 2, true);
+            view.setUint16(32, numChannels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, totalSamples * 2 * numChannels, true);
+
+            let offset = 44;
+            for (let i = 0; i < totalSamples; i++) {
+                let sL = Math.max(-1, Math.min(1, samplesL[i]));
+                let sR = Math.max(-1, Math.min(1, samplesR[i]));
+                view.setInt16(offset, sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
+                offset += 2;
+                view.setInt16(offset, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
+                offset += 2;
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function startAudioRecording() {
+            ensureAudioContext();
+            recordedPcmBuffersL = [];
+            recordedPcmBuffersR = [];
+
+            scriptProcessorNode = audioCtx.createScriptProcessor(4096, 2, 2);
+            scriptProcessorNode.onaudioprocess = (e) => {
+                if (!isRecording) return;
+                recordedPcmBuffersL.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+                recordedPcmBuffersR.push(new Float32Array(e.inputBuffer.getChannelData(1)));
+            };
+
+            masterGainNode.connect(scriptProcessorNode);
+            scriptProcessorNode.connect(audioCtx.destination);
+
+            isRecording = true;
+            document.getElementById('recStatus').innerText = 'Εγγραφή...';
+            document.getElementById('recStatus').className = 'text-techno-pink font-display animate-pulse';
+            document.getElementById('recBtnText').innerText = 'Διακοπή';
+            document.getElementById('recordBtn').classList.add('bg-red-600', 'text-white');
+            document.getElementById('downloadLink').classList.add('hidden');
+        }
+
+        function stopAudioRecording() {
+            if (!isRecording) return;
+            isRecording = false;
+
+            if (scriptProcessorNode) {
+                scriptProcessorNode.disconnect();
+                scriptProcessorNode = null;
+            }
+
+            document.getElementById('recStatus').innerText = 'Επεξεργασία WAV...';
+            document.getElementById('recStatus').className = 'text-yellow-400 font-display';
+
+            setTimeout(() => {
+                if (recordedPcmBuffersL.length > 0) {
+                    let totalLength = recordedPcmBuffersL.reduce((acc, curr) => acc + curr.length, 0);
+                    let mergedL = new Float32Array(totalLength);
+                    let mergedR = new Float32Array(totalLength);
+                    let offset = 0;
+
+                    for (let i = 0; i < recordedPcmBuffersL.length; i++) {
+                        mergedL.set(recordedPcmBuffersL[i], offset);
+                        mergedR.set(recordedPcmBuffersR[i], offset);
+                        offset += recordedPcmBuffersL[i].length;
+                    }
+
+                    const wavBlob = createWavBlob(mergedL, mergedR, audioCtx.sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    const downloadBtn = document.getElementById('downloadLink');
+                    downloadBtn.href = audioUrl;
+                    downloadBtn.download = `techno-track-${Date.now()}.wav`;
+                    downloadBtn.classList.remove('hidden');
+
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = downloadBtn.download;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    document.getElementById('recStatus').innerText = 'Έτοιμο για λήψη!';
+                    document.getElementById('recStatus').className = 'text-techno-acid font-display';
+                }
+                document.getElementById('recBtnText').innerText = 'Εγγραφή WAV';
+                document.getElementById('recordBtn').classList.remove('bg-red-600', 'text-white');
+            }, 200);
+        }
+
+        // --- Event Listeners & Master Controls ---
+
+        document.getElementById('playBtn').onclick = () => {
+            ensureAudioContext();
+            if (isPlaying) return;
+            isPlaying = true;
+            currentStep = 0;
+            nextNoteTime = audioCtx.currentTime;
+            scheduler();
+
+            document.getElementById('engineStatus').innerText = 'Playing';
+            document.getElementById('engineStatus').className = 'text-techno-accent font-display animate-pulse';
+            document.getElementById('playBtn').classList.add('bg-emerald-400');
+        };
+
+        document.getElementById('stopBtn').onclick = () => {
+            isPlaying = false;
+            clearTimeout(timerID);
+            document.getElementById('engineStatus').innerText = 'Stopped';
+            document.getElementById('engineStatus').className = 'text-gray-400 font-display';
+            document.getElementById('playBtn').classList.remove('bg-emerald-400');
+            document.querySelectorAll('.step-btn').forEach(btn => btn.classList.remove('current'));
+        };
+
+        document.getElementById('bpmSlider').oninput = (e) => {
+            bpm = parseInt(e.target.value);
+            document.getElementById('bpmDisplay').innerText = bpm;
+        };
+
+        document.getElementById('swingSlider').oninput = (e) => {
+            swingAmount = parseInt(e.target.value);
+            document.getElementById('swingDisplay').innerText = `${swingAmount}%`;
+        };
+
+        // Tap Tempo
+        let tapTimes = [];
+        document.getElementById('tapTempoBtn').onclick = () => {
+            const now = Date.now();
+            tapTimes.push(now);
+            if (tapTimes.length > 4) tapTimes.shift();
+
+            if (tapTimes.length > 1) {
+                const intervals = [];
+                for (let i = 1; i < tapTimes.length; i++) {
+                    intervals.push(tapTimes[i] - tapTimes[i - 1]);
+                }
+                const avgMs = intervals.reduce((a, b) => a + b) / intervals.length;
+                bpm = Math.min(180, Math.max(60, Math.round(60000 / avgMs)));
+                document.getElementById('bpmSlider').value = bpm;
+                document.getElementById('bpmDisplay').innerText = bpm;
+            }
+        };
+
+        // Step Counts (16, 32, 64)
+        ['16', '32', '64'].forEach(steps => {
+            document.getElementById(`step${steps}Btn`).onclick = () => {
+                totalSteps = parseInt(steps);
+                ['16', '32', '64'].forEach(s => {
+                    const btn = document.getElementById(`step${s}Btn`);
+                    btn.className = `px-2 py-1 rounded text-[10px] font-display font-bold ${s === steps ? 'bg-techno-accent text-black' : 'text-gray-400 hover:text-white bg-techno-card border border-techno-border'} transition`;
+                });
+                renderSequencerGrid();
+            };
+        });
+
+        // Bank Selectors (A, B, C, D)
+        document.querySelectorAll('.bank-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                currentBank = parseInt(e.target.dataset.bank);
+                document.querySelectorAll('.bank-btn').forEach(b => {
+                    b.className = `bank-btn px-2 py-0.5 text-[10px] font-display font-bold rounded ${parseInt(b.dataset.bank) === currentBank ? 'bg-techno-pink text-white' : 'text-gray-400 hover:text-white'}`;
+                });
+                document.getElementById('bankIndicator').innerText = `BANK ${['A', 'B', 'C', 'D'][currentBank]}`;
+                renderSequencerGrid();
+            };
+        });
+
+        // Genre Presets Dropdown
+        document.getElementById('presetSelect').onchange = (e) => {
+            loadPreset(e.target.value);
+        };
+
+        // Randomize & Clear
+        document.getElementById('randomizeBtn').onclick = () => {
+            TRACK_KEYS.forEach(k => {
+                for (let i = 0; i < 64; i++) {
+                    patternBanks[currentBank][k].steps[i] = Math.random() < 0.28;
+                }
+            });
+            renderSequencerGrid();
+        };
+
+        document.getElementById('clearBtn').onclick = () => {
+            TRACK_KEYS.forEach(k => patternBanks[currentBank][k].steps.fill(false));
+            renderSequencerGrid();
+        };
+
+        // Pattern JSON Export / Import
+        document.getElementById('exportPatternBtn').onclick = () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(patternBanks));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `techno-pattern-banks-${Date.now()}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
+
+        document.getElementById('importPatternBtn').onclick = () => {
+            document.getElementById('importFileInput').click();
+        };
+
+        document.getElementById('importFileInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    patternBanks = JSON.parse(event.target.result);
+                    renderSequencerGrid();
+                } catch (err) {
+                    alert("Σφάλμα κατά την εισαγωγή του αρχείου JSON.");
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        // FX & Master Controls
+        document.getElementById('masterDrive').oninput = (e) => {
+            const val = parseInt(e.target.value);
+            document.getElementById('driveValue').innerText = `${val}%`;
+            updateMasterDrive(val);
+        };
+
+        document.getElementById('masterFilterCutoff').oninput = (e) => {
+            if (masterFilterNode) masterFilterNode.frequency.value = parseFloat(e.target.value);
+        };
+
+        // Acid Controls UI Update
+        document.getElementById('acidCutoff').oninput = (e) => {
+            document.getElementById('cutoffValue').innerText = `${e.target.value} Hz`;
+        };
+        document.getElementById('acidRes').oninput = (e) => {
+            document.getElementById('resValue').innerText = `${e.target.value} dB`;
+        };
+        document.getElementById('acidDecay').oninput = (e) => {
+            document.getElementById('decayValue').innerText = `${e.target.value} s`;
+        };
+        document.getElementById('acidAccent').oninput = (e) => {
+            document.getElementById('accentValue').innerText = `${e.target.value}%`;
+        };
+
+        document.getElementById('waveSaw').onclick = () => {
+            acidWaveform = 'sawtooth';
+            document.getElementById('waveSaw').className = 'flex-1 py-1 text-[10px] font-display rounded bg-techno-acid text-black font-bold';
+            document.getElementById('waveSquare').className = 'flex-1 py-1 text-[10px] font-display rounded bg-techno-card text-gray-400 border border-techno-border';
+        };
+
+        document.getElementById('waveSquare').onclick = () => {
+            acidWaveform = 'square';
+            document.getElementById('waveSquare').className = 'flex-1 py-1 text-[10px] font-display rounded bg-techno-acid text-black font-bold';
+            document.getElementById('waveSaw').className = 'flex-1 py-1 text-[10px] font-display rounded bg-techno-card text-gray-400 border border-techno-border';
+        };
+
+        // Tabs Switching Logic
+        const tabs = [
+            { btn: 'tabAcidBtn', content: 'tabAcidContent' },
+            { btn: 'tabFxBtn', content: 'tabFxContent' },
+            { btn: 'tabMixerBtn', content: 'tabMixerContent' }
+        ];
+
+        tabs.forEach(t => {
+            document.getElementById(t.btn).onclick = () => {
+                tabs.forEach(o => {
+                    document.getElementById(o.content).classList.add('hidden');
+                    document.getElementById(o.btn).className = 'tab-btn flex-1 py-1.5 rounded-lg text-gray-400 hover:text-white transition text-center';
+                });
+                document.getElementById(t.content).classList.remove('hidden');
+                document.getElementById(t.btn).className = 'tab-btn flex-1 py-1.5 rounded-lg active-tab transition text-center';
+            };
+        });
+
+        // Record Button Toggle
+        document.getElementById('recordBtn').onclick = () => {
+            if (!isRecording) startAudioRecording();
+            else stopAudioRecording();
+        };
+
+        // Initial Load Setup
+        window.onload = () => {
+            loadPreset('peakTime');
+        };
+    </script>
+</body>
+</html>
